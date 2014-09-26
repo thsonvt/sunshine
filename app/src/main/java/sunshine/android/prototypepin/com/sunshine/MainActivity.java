@@ -1,30 +1,19 @@
 package sunshine.android.prototypepin.com.sunshine;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.os.AsyncTask;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class MainActivity extends Activity {
+
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +41,46 @@ public class MainActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
+        }else if (id == R.id.action_map){
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+//            Uri geoLocation = new Uri
+//            Uri buildUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+//                    .appendQueryParameter(QUERY_PARAM, params[0])
+//                    .appendQueryParameter(FORMAT_PARAM, format)
+//                    .appendQueryParameter(UNITS_PARAM, units)
+//                    .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+//                    .build();
+
+//            intent.setData(geoLocation);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            }
+
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openPreferredLocationInMap(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String location = sharedPreferences.getString(
+                getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+
+        Uri geoLocation = Uri.parse("geo:0,0?").buildUpon()
+                .appendQueryParameter("q", location)
+                .build();
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+
+        if (intent.resolveActivity(getPackageManager()) != null)
+            startActivity(intent);
+        else
+            Log.d(LOG_TAG, "Could not call "+location + ", no");
+
     }
 
 //    private class FetchWeatherTask extends AsyncTask<Void, Void, Void> {
